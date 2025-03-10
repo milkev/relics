@@ -245,6 +245,7 @@ public class HolyLocketItem extends RelicItem {
 
             var targets = 0;
 
+            //steal heals
             for (var player : EntityUtils.gatherPotentialTargets(entity, Player.class, maxDistance).toList()) {
                 if (player.getStringUUID().equals(entity.getStringUUID()))
                     continue;
@@ -277,6 +278,7 @@ public class HolyLocketItem extends RelicItem {
                     break;
             }
 
+            //heals damage stuff
             if (entity instanceof Player player && player.getHealth() < player.getMaxHealth()) {
                 for (var stack : EntityUtils.findEquippedCurios(player, ItemRegistry.HOLY_LOCKET.get())) {
                     if (!(stack.getItem() instanceof HolyLocketItem relic) || relic.getMode(stack) != Mode.WICKEDNESS || !relic.canPlayerUseAbility(player, stack, "faith"))
