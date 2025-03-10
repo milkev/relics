@@ -44,8 +44,8 @@ public abstract class PiglinAiMixin {
                     relic.spreadRelicExperience(player, stack, 3);
                 }
             }
-
-            ci.cancel();
+            //this shouldnt be cancelled, since if the bastion ring does not have the trade ability unlocked, the rest of the function will get cancelled and the piglin will not return anything to the player.
+            //ci.cancel();
         }
     }
 }
