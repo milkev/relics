@@ -7,15 +7,17 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,15 +25,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -310,13 +311,19 @@ public class EntityUtils {
 
         return items;
     }
-
+    
     public static <T extends LivingEntity> Stream<T> gatherPotentialTargets(Entity seeker, Class<T> type, double radius) {
+        
         return seeker.getCommandSenderWorld().getEntitiesOfClass(type, seeker.getBoundingBox().inflate(radius)).stream()
                 .sorted(Comparator.comparing(entry -> seeker.position().distanceTo(entry.position())))
                 .filter(entry -> !(entry instanceof ArmorStand)
                         && !entry.isDeadOrDying()
                         && entry.hasLineOfSight(seeker)
-                        && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entry));
+                        && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entry)
+                        //dont target allied entities
+                        && !entry.isAlliedTo(seeker)
+                        //attempt filter out non-hostile mobs?
+                        && entry.getType().getCategory().equals(MobCategory.MONSTER) || (entry instanceof Player)
+                        );
     }
 }
